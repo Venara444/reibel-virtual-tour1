@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jalan Virtual Reibel :3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffd6e7 0%, #ffb6c1 100%);
+            color: #8a1c7d;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Container utama */
+        .mobile-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            padding-bottom: 20px;
+        }
+
+        /* Header */
+        .mobile-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            flex-shrink: 0;
+        }
+
+        .mobile-title {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #ff69b4, #ff1493, #db7093);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .mobile-subtitle {
+            font-size: 0.95rem;
+            color: #d63384;
+            font-weight: 500;
+        }
+
+        /* Area lokasi (main content) */
+        .mobile-locations-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            min-height: 300px;
+            margin-bottom: 10px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 105, 180, 0.3);
+        }
+
+        /* Lintasan untuk mobile */
+        .mobile-path {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .mobile-path-line {
+            fill: none;
+            stroke: rgba(219, 112, 147, 0.5);
+            stroke-width: 3;
+            stroke-dasharray: 8, 8;
+        }
+
+        /* Lokasi-lokasi untuk mobile */
+        .mobile-location {
+            position: absolute;
+            width: 85px;
+            height: 85px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #ff69b4;
+            padding: 10px;
+            box-shadow: 0 8px 20px rgba(219, 112, 147, 0.3);
+            touch-action: manipulation;
+        }
+
+        .mobile-location:active {
+            transform: scale(0.95);
+        }
+
+        .mobile-location.active {
+            border-color: #ff1493;
+            box-shadow: 0 0 25px rgba(255, 20, 147, 0.6);
+            transform: scale(1.05);
+            z-index: 100;
+        }
+
+        .mobile-location-icon {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+
+        .mobile-location-name {
+            font-size: 0.7rem;
+            text-align: center;
+            font-weight: bold;
+            color: #c71585;
+            line-height: 1.1;
+        }
+
+        /* Posisi lokasi untuk mobile (diatur dengan %) */
+        .mobile-location-1 { /* maw kopi */
+            top: 10%;
+            left: 5%;
+        }
+
+        .mobile-location-2 { /* nnton teyus */
+            top: 10%;
+            right: 5%;
+        }
+
+        .mobile-location-3 { /* cheesecake */
+            bottom: 15%;
+            right: 5%;
+        }
+
+        .mobile-location-4 { /* yukk pantai sayangg */
+            bottom: 15%;
+            left: 5%;
+        }
+
+        .mobile-location-5 { /* aquarium datee */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Karakter untuk mobile */
+        .mobile-character {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            z-index: 9999;
+            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+        }
+
+        .mobile-character-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            animation: float-mobile 2s ease-in-out infinite;
+        }
+
+        @keyframes float-mobile {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Kontrol untuk mobile */
+        .mobile-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+            flex-shrink: 0;
+        }
+
+        .mobile-btn {
+            padding: 12px 5px;
+            border: none;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            touch-action: manipulation;
+        }
+
+        .mobile-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mobile-btn-primary {
+            background: linear-gradient(90deg, #ff69b4, #ff1493);
+            color: white;
+        }
+
+        .mobile-btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #ff1493;
+            border: 2px solid #ff69b4;
+        }
+
+        .mobile-btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .mobile-btn-text {
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        /* Panel status untuk mobile */
+        .mobile-status-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 5px;
+            border: 2px solid #ff69b4;
+            flex-shrink: 0;
+        }
+
+        .mobile-status-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #ff1493;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .mobile-status-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-current-location {
+            font-size: 0.9rem;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .mobile-current-location span {
+            color: #ff69b4;
+            background: rgba(255, 182, 193, 0.3);
+            padding: 4px 10px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .mobile-audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-play-btn {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+
+        .mobile-play-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Footer untuk mobile */
+        .mobile-footer {
+            text-align: center;
+            margin-top: 10px;
+            padding: 12px;
+            color: #c71585;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 2px dashed #ff69b4;
+            flex-shrink: 0;
+        }
+
+        /* Animasi untuk mobile */
+        .mobile-character.moving {
+            animation: bounce-mobile 0.4s infinite alternate;
+        }
+
+        @keyframes bounce-mobile {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-5px); }
+        }
+
+        /* Efek kilatan untuk mobile */
+        @keyframes sparkle-mobile {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .mobile-sparkle {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #ff69b4;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            animation: sparkle-mobile 0.5s ease-out;
+        }
+
+        /* Landscape mode adjustment */
+        @media (orientation: landscape) {
+            .mobile-container {
+                flex-direction: row;
+                padding: 10px;
+            }
+            
+            .mobile-header {
+                width: 25%;
+                margin-bottom: 0;
+                margin-right: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .mobile-title {
+                font-size: 1.5rem;
+            }
+            
+            .mobile-subtitle {
+                font-size: 0.85rem;
+            }
+            
+            .mobile-locations-container {
+                flex: 1;
+                margin-bottom: 0;
+                margin-right: 10px;
+            }
+            
+            .mobile-location {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .mobile-location-icon {
+                font-size: 1.8rem;
+            }
+            
+            .mobile-location-name {
+                font-size: 0.65rem;
+            }
+            
+            .mobile-right-panel {
+                width: 30%;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .mobile-controls {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .mobile-btn {
+                padding: 10px 5px;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding-left: 15px;
+            }
+            
+            .mobile-btn-icon {
+                font-size: 1rem;
+                margin-right: 8px;
+            }
+            
+            .mobile-status-panel {
+                margin-top: 0;
+                margin-bottom: 10px;
+            }
+            
+            .mobile-footer {
+                margin-top: auto;
+            }
+        }
+
+        /* iPhone notch safe areas */
+        @supports (padding: max(0px)) {
+            .mobile-container {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-top: max(15px, env(safe-area-inset-top));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Untuk layar sangat kecil */
+        @media (max-width: 320px) {
+            .mobile-location {
+                width: 75px;
+                height: 75px;
+            }
+            
+            .mobile-location-icon {
+                font-size: 1.8rem;
+            }
+            
+            .mobile-title {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Untuk layar lebih besar (tablet) */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .mobile-location {
+                width: 110px;
+                height: 110px;
+            }
+            
+            .mobile-location-icon {
+                font-size: 3rem;
+            }
+            
+            .mobile-location-name {
+                font-size: 0.9rem;
+            }
+            
+            .mobile-character {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .mobile-title {
+                font-size: 2.2rem;
+            }
+            
+            .mobile-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+    
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="mobile-container">
+        <header class="mobile-header">
+            <h1 class="mobile-title">jalan virtual reibel :3</h1>
+            <p class="mobile-subtitle">klik klik coba yangggg wkwkwk</p>
+        </header>
+        
+        <div class="mobile-locations-container">
+            <!-- Lintasan SVG -->
+            <svg class="mobile-path" id="mobilePathSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            
+            <!-- Lokasi 1: maw kopi -->
+            <div class="mobile-location mobile-location-1" data-location="1">
+                <div class="mobile-location-icon">☕💕</div>
+                <div class="mobile-location-name">maw kopi</div>
+            </div>
+            
+            <!-- Lokasi 2: nnton teyus -->
+            <div class="mobile-location mobile-location-2" data-location="2">
+                <div class="mobile-location-icon" style="color: #2d5016;">🎬🍿</div>
+                <div class="mobile-location-name">nnton teyus</div>
+            </div>
+            
+            <!-- Lokasi 3: cheesecake -->
+            <div class="mobile-location mobile-location-3" data-location="3">
+                <div class="mobile-location-icon">🍰✨</div>
+                <div class="mobile-location-name">cheesecake</div>
+            </div>
+            
+            <!-- Lokasi 4: yukk pantai sayangg -->
+            <div class="mobile-location mobile-location-4" data-location="4">
+                <div class="mobile-location-icon">🏖️🌊</div>
+                <div class="mobile-location-name">yukk pantai sayangg</div>
+            </div>
+            
+            <!-- Lokasi 5: aquarium datee -->
+            <div class="mobile-location mobile-location-5" data-location="5">
+                <div class="mobile-location-icon">🐠💑</div>
+                <div class="mobile-location-name">aquarium datee</div>
+            </div>
+            
+            <!-- Karakter -->
+            <div class="mobile-character" id="mobileCharacter">
+                <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" alt="Reibel" class="mobile-character-img" id="mobileCharacterImg">
+            </div>
+        </div>
+        
+        <div class="mobile-right-panel">
+            <div class="mobile-controls">
+                <button class="mobile-btn mobile-btn-primary" id="mobileStartBtn">
+                    <i class="mobile-btn-icon fas fa-play"></i>
+                    <span class="mobile-btn-text">Mulai Jalan</span>
+                </button>
+                <button class="mobile-btn mobile-btn-secondary" id="mobileResetBtn">
+                    <i class="mobile-btn-icon fas fa-redo"></i>
+                    <span class="mobile-btn-text">Ulang Lagi</span>
+                </button>
+                <button class="mobile-btn mobile-btn-secondary" id="mobileMuteBtn">
+                    <i class="mobile-btn-icon fas fa-volume-up"></i>
+                    <span class="mobile-btn-text">Suara</span>
+                </button>
+            </div>
+            
+            <div class="mobile-status-panel">
+                <h3 class="mobile-status-title">Status Jalan-Jalan</h3>
+                <div class="mobile-status-content">
+                    <div class="mobile-current-location">
+                        Sekarang di:<br>
+                        <span id="mobileCurrentLocation">belum mulai wkwk</span>
+                    </div>
+                    <div class="mobile-audio-controls">
+                        <button class="mobile-play-btn" id="mobilePlayBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="mobile-footer">
+                <p>buat rei sayangnya ibell yang kuat hebat keren banget 💖✨</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Audio untuk mobile -->
+    <audio id="mobileAudio1" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-happy-birthday-song-437.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="mobileAudio2" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-cinematic-whoosh-1129.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="mobileAudio3" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="mobileAudio4" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-ocean-waves-loop-1244.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="mobileAudio5" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-bubbles-underwater-1162.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Data lokasi untuk mobile
+        const mobileLocations = [
+            { id: 1, name: "maw kopi", audioId: "mobileAudio1" },
+            { id: 2, name: "nnton teyus", audioId: "mobileAudio2" },
+            { id: 3, name: "cheesecake", audioId: "mobileAudio3" },
+            { id: 4, name: "yukk pantai sayangg", audioId: "mobileAudio4" },
+            { id: 5, name: "aquarium datee", audioId: "mobileAudio5" }
+        ];
+
+        // State aplikasi
+        let mobileCurrentLocationIndex = 0;
+        let mobileIsMuted = false;
+        let mobileIsAutoPlaying = false;
+        let mobileIsMoving = false;
+
+        // Elemen DOM mobile
+        const mobileCharacter = document.getElementById('mobileCharacter');
+        const mobileCharacterImg = document.getElementById('mobileCharacterImg');
+        const mobileCurrentLocationText = document.getElementById('mobileCurrentLocation');
+        const mobilePlayBtn = document.getElementById('mobilePlayBtn');
+        const mobileStartBtn = document.getElementById('mobileStartBtn');
+        const mobileResetBtn = document.getElementById('mobileResetBtn');
+        const mobileMuteBtn = document.getElementById('mobileMuteBtn');
+        const mobileLocationElements = document.querySelectorAll('.mobile-location');
+        const mobilePathSvg = document.getElementById('mobilePathSvg');
+
+        // Fungsi untuk membuat lintasan mobile
+        function createMobilePath() {
+            mobilePathSvg.innerHTML = '';
+            
+            // Titik-titik untuk lintasan (disesuaikan dengan posisi lokasi mobile)
+            const points = [
+                { x: 10, y: 15 },   // maw kopi
+                { x: 90, y: 15 },   // nnton teyus
+                { x: 90, y: 80 },   // cheesecake
+                { x: 10, y: 80 },   // yukk pantai sayangg
+                { x: 50, y: 50 }    // aquarium datee
+            ];
+            
+            // Buat garis polygon
+            let pathData = `M ${points[0].x} ${points[0].y} `;
+            for (let i = 1; i < points.length; i++) {
+                pathData += `L ${points[i].x} ${points[i].y} `;
+            }
+            pathData += `L ${points[0].x} ${points[0].y}`;
+            
+            // Tambahkan path ke SVG
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.classList.add("mobile-path-line");
+            mobilePathSvg.appendChild(path);
+            
+            // Tambahkan titik di setiap lokasi
+            points.forEach((point, index) => {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", point.x);
+                circle.setAttribute("cy", point.y);
+                circle.setAttribute("r", "1.5");
+                circle.setAttribute("fill", "#ff69b4");
+                circle.setAttribute("stroke", "white");
+                circle.setAttribute("stroke-width", "0.5");
+                mobilePathSvg.appendChild(circle);
+            });
+        }
+
+        // Fungsi untuk memuat gambar karakter dari lokal
+        function loadMobileCharacterImage() {
+            const localImage = new Image();
+            localImage.onload = function() {
+                mobileCharacterImg.src = "C:\\Users\\user\\Downloads\\hm\\lutju.png";
+                mobileCharacterImg.style.filter = "drop-shadow(0 3px 8px rgba(255, 105, 180, 0.5))";
+            };
+            localImage.onerror = function() {
+                mobileCharacterImg.src = "https://cdn-icons-png.flaticon.com/512/4333/4333609.png";
+                mobileCharacterImg.style.filter = "drop-shadow(0 3px 8px rgba(255, 105, 180, 0.5))";
+            };
+            localImage.src = "C:\\Users\\user\\Downloads\\hm\\lutju.png";
+        }
+
+        // Fungsi untuk membuat efek kilatan mobile
+        function createMobileSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'mobile-sparkle';
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+            document.querySelector('.mobile-locations-container').appendChild(sparkle);
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 500);
+        }
+
+        // Fungsi untuk memindahkan karakter ke lokasi mobile
+        function moveMobileCharacterToLocation(locationId) {
+            if (mobileIsMoving) return;
+            mobileIsMoving = true;
+            
+            const location = mobileLocations[locationId - 1];
+            const locationElement = document.querySelector(`.mobile-location-${locationId}`);
+            
+            // Dapatkan posisi lokasi
+            const rect = locationElement.getBoundingClientRect();
+            const containerRect = document.querySelector('.mobile-locations-container').getBoundingClientRect();
+            
+            // Hitung posisi karakter
+            const charTop = rect.top - containerRect.top + rect.height / 2 - mobileCharacter.offsetHeight / 2;
+            const charLeft = rect.left - containerRect.left + rect.width / 2 - mobileCharacter.offsetWidth / 2;
+            
+            // Karakter selalu di atas
+            mobileCharacter.style.zIndex = "9999";
+            mobileCharacter.classList.add('moving');
+            
+            // Animasi bergerak
+            mobileCharacter.style.top = `${charTop}px`;
+            mobileCharacter.style.left = `${charLeft}px`;
+            
+            // Update status
+            mobileCurrentLocationIndex = locationId - 1;
+            mobileCurrentLocationText.textContent = location.name;
+            updateMobileActiveLocation(locationId);
+            
+            // Efek kilatan
+            createMobileSparkle(charLeft + 35, charTop + 35);
+            
+            // Selesai bergerak
+            setTimeout(() => {
+                mobileCharacter.classList.remove('moving');
+                mobileIsMoving = false;
+            }, 1500);
+            
+            return location;
+        }
+
+        // Fungsi untuk memutar audio mobile
+        function playMobileLocationAudio(locationId) {
+            if (mobileIsMuted) return;
+            
+            const audioElement = document.getElementById(`mobileAudio${locationId}`);
+            if (audioElement) {
+                stopAllMobileAudio();
+                
+                audioElement.currentTime = 0;
+                audioElement.volume = 0.7;
+                audioElement.play().catch(e => console.log("Autoplay dicegah:", e));
+                
+                mobilePlayBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                
+                audioElement.onended = function() {
+                    mobilePlayBtn.innerHTML = '<i class="fas fa-play"></i>';
+                };
+            }
+        }
+
+        // Fungsi untuk menghentikan semua audio mobile
+        function stopAllMobileAudio() {
+            for (let i = 1; i <= 5; i++) {
+                const audio = document.getElementById(`mobileAudio${i}`);
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+            }
+            mobilePlayBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+
+        // Fungsi untuk memperbarui lokasi aktif mobile
+        function updateMobileActiveLocation(locationId) {
+            mobileLocationElements.forEach(loc => {
+                loc.classList.remove('active');
+            });
+            
+            const activeLocation = document.querySelector(`.mobile-location-${locationId}`);
+            if (activeLocation) {
+                activeLocation.classList.add('active');
+                activeLocation.style.zIndex = "100";
+            }
+        }
+
+        // Fungsi untuk memulai perjalanan otomatis mobile
+        function startMobileAutoJourney() {
+            if (mobileIsAutoPlaying) return;
+            
+            mobileIsAutoPlaying = true;
+            mobileStartBtn.innerHTML = '<i class="mobile-btn-icon fas fa-pause"></i><span class="mobile-btn-text">Jeda</span>';
+            
+            let locationOrder = [1, 2, 3, 4, 5];
+            
+            moveToMobileLocationInJourney(0);
+            
+            function moveToMobileLocationInJourney(index) {
+                if (!mobileIsAutoPlaying || index >= locationOrder.length) {
+                    if (mobileIsAutoPlaying) {
+                        setTimeout(() => moveToMobileLocationInJourney(0), 2000);
+                    }
+                    return;
+                }
+                
+                const locationId = locationOrder[index];
+                const location = moveMobileCharacterToLocation(locationId);
+                playMobileLocationAudio(locationId);
+                
+                setTimeout(() => {
+                    moveToMobileLocationInJourney(index + 1);
+                }, 4000);
+            }
+        }
+
+        // Fungsi untuk menghentikan perjalanan otomatis mobile
+        function stopMobileAutoJourney() {
+            mobileIsAutoPlaying = false;
+            mobileStartBtn.innerHTML = '<i class="mobile-btn-icon fas fa-play"></i><span class="mobile-btn-text">Mulai Jalan</span>';
+            stopAllMobileAudio();
+        }
+
+        // Fungsi untuk mereset perjalanan mobile
+        function resetMobileJourney() {
+            stopMobileAutoJourney();
+            stopAllMobileAudio();
+            
+            // Kembalikan karakter ke tengah
+            const containerRect = document.querySelector('.mobile-locations-container').getBoundingClientRect();
+            mobileCharacter.style.top = `${containerRect.height / 2 - 35}px`;
+            mobileCharacter.style.left = `${containerRect.width / 2 - 35}px`;
+            mobileCharacter.style.zIndex = "9999";
+            
+            // Reset state
+            mobileCurrentLocationIndex = 0;
+            mobileCurrentLocationText.textContent = "belum mulai wkwk";
+            
+            // Reset lokasi aktif
+            mobileLocationElements.forEach(loc => {
+                loc.classList.remove('active');
+                loc.style.zIndex = "10";
+            });
+        }
+
+        // Coba muat audio lokal untuk mobile
+        function tryLoadMobileLocalAudio() {
+            const audioPaths = [
+                "C:\\Users\\user\\Downloads\\hm\\satu.ogg",
+                "C:\\Users\\user\\Downloads\\hm\\dua.ogg", 
+                "C:\\Users\\user\\Downloads\\hm\\tiga.ogg",
+                "C:\\Users\\user\\Downloads\\hm\\empat.ogg",
+                "C:\\Users\\user\\Downloads\\hm\\lima.ogg"
+            ];
+            
+            for (let i = 0; i < 5; i++) {
+                const audioElement = document.getElementById(`mobileAudio${i+1}`);
+                const localSource = document.createElement('source');
+                localSource.src = audioPaths[i];
+                localSource.type = 'audio/ogg';
+                
+                audioElement.innerHTML = '';
+                audioElement.appendChild(localSource);
+                audioElement.load();
+            }
+        }
+
+        // Event listeners untuk mobile
+        mobileLocationElements.forEach(locationEl => {
+            locationEl.addEventListener('click', function() {
+                if (mobileIsMoving) return;
+                
+                const locationId = parseInt(this.getAttribute('data-location'));
+                const location = moveMobileCharacterToLocation(locationId);
+                playMobileLocationAudio(locationId);
+                
+                if (mobileIsAutoPlaying) {
+                    stopMobileAutoJourney();
+                }
+            });
+            
+            // Tambahkan touch feedback
+            locationEl.addEventListener('touchstart', function() {
+                this.style.opacity = '0.8';
+            });
+            
+            locationEl.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+            });
+        });
+
+        mobileStartBtn.addEventListener('click', function() {
+            if (mobileIsAutoPlaying) {
+                stopMobileAutoJourney();
+            } else {
+                startMobileAutoJourney();
+            }
+        });
+
+        mobileResetBtn.addEventListener('click', resetMobileJourney);
+
+        mobileMuteBtn.addEventListener('click', function() {
+            mobileIsMuted = !mobileIsMuted;
+            if (mobileIsMuted) {
+                mobileMuteBtn.innerHTML = '<i class="mobile-btn-icon fas fa-volume-mute"></i><span class="mobile-btn-text">Suara</span>';
+                stopAllMobileAudio();
+            } else {
+                mobileMuteBtn.innerHTML = '<i class="mobile-btn-icon fas fa-volume-up"></i><span class="mobile-btn-text">Suara</span>';
+            }
+        });
+
+        mobilePlayBtn.addEventListener('click', function() {
+            if (mobileCurrentLocationIndex >= 0) {
+                const currentAudio = document.getElementById(`mobileAudio${mobileCurrentLocationIndex + 1}`);
+                if (currentAudio.paused) {
+                    playMobileLocationAudio(mobileCurrentLocationIndex + 1);
+                } else {
+                    stopAllMobileAudio();
+                }
+            }
+        });
+
+        // Inisialisasi aplikasi mobile
+        function initMobileApp() {
+            createMobilePath();
+            loadMobileCharacterImage();
+            tryLoadMobileLocalAudio();
+            
+            // Posisi awal karakter di tengah
+            const containerRect = document.querySelector('.mobile-locations-container').getBoundingClientRect();
+            mobileCharacter.style.top = `${containerRect.height / 2 - 35}px`;
+            mobileCharacter.style.left = `${containerRect.width / 2 - 35}px`;
+            
+            // Preload audio untuk responsif
+            for (let i = 1; i <= 5; i++) {
+                const audio = document.getElementById(`mobileAudio${i}`);
+                audio.load();
+            }
+            
+            // Cegah zoom dengan double tap
+            document.addEventListener('touchstart', function(event) {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+            
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+        }
+
+        // Jalankan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', initMobileApp);
+        
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                // Reposition character after orientation change
+                if (mobileCurrentLocationIndex >= 0) {
+                    const locationId = mobileCurrentLocationIndex + 1;
+                    moveMobileCharacterToLocation(locationId);
+                }
+            }, 300);
+        });
+        
+        // Handle resize untuk mobile
+        window.addEventListener('resize', function() {
+            if (mobileCurrentLocationIndex >= 0) {
+                const locationId = mobileCurrentLocationIndex + 1;
+                moveMobileCharacterToLocation(locationId);
+            }
+        });
+    </script>
+</body>
+</html>
